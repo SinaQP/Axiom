@@ -14,3 +14,5 @@ def remove_duplicates(input_path: str, output_path: str = None) -> None:
     
     df_unique.to_csv(output_path, index=False, header=False)
     print(f"✅ Cleaned file saved at: {output_path}")
+    
+remove_duplicates("chatbot_training_dataset.csv")
