@@ -392,52 +392,52 @@ class DatasetGenerator:
         new_dataframe = pd.DataFrame(self.dataset)
         print(new_dataframe.head())
 
-def main():
-    generator = DatasetGenerator(
-        dataset_filename="emotion_dataset.csv",
-        samples_per_request=25,
-        data_key="samples"
-    )
+# def main():
+#     generator = DatasetGenerator(
+#         dataset_filename="emotion_dataset.csv",
+#         samples_per_request=25,
+#         data_key="samples"
+#     )
     
-    # Set up the emotion prompt template
-    emotion_prompt = """
-{context} {count} نمونه‌ی متن فارسی کوتاه تولید کن که هرکدام بیانگر یکی از احساسات انسانی باشند.
+#     # Set up the emotion prompt template
+#     emotion_prompt = """
+#     {context} {count} نمونه‌ی متن فارسی کوتاه تولید کن که هرکدام بیانگر یکی از احساسات انسانی باشند.
 
-خروجی را فقط و فقط در فرمت JSON خالص ارائه بده (بدون markdown یا کد بلوک).
-کلیدهای JSON باید شامل "{data_key}" باشد که یک آرایه از آبجکت‌ها است.
-{field_instructions}
+#     خروجی را فقط و فقط در فرمت JSON خالص ارائه بده (بدون markdown یا کد بلوک).
+#     کلیدهای JSON باید شامل "{data_key}" باشد که یک آرایه از آبجکت‌ها است.
+#     {field_instructions}
 
-مثال فرمت خروجی:
-{{"{data_key}": [{{"text": "من امروز خوشحالم", "emotion": "شادی"}}]}}
+#     مثال فرمت خروجی:
+#     {{"{data_key}": [{{"text": "من امروز خوشحالم", "emotion": "شادی"}}]}}
 
-هیچ متن اضافی، توضیح، یا کد بلوک قبل یا بعد از JSON قرار نده.
-فقط JSON خالص ارائه بده.
-"""
+#     هیچ متن اضافی، توضیح، یا کد بلوک قبل یا بعد از JSON قرار نده.
+#     فقط JSON خالص ارائه بده.
+#     """
     
-    # Set up field instructions for emotions
-    emotion_fields = """
-هر آبجکت باید شامل "text" و "emotion" باشد.
-مقدار "text" باید یک جمله‌ی کوتاه فارسی باشد (مثلاً «من امروز برنده شدم»).
-مقدار "emotion" باید یکی از این موارد باشد: "غم"، "خشم"، "شگفتی"، "شادی"، "تنفر"، "ترس".
-"""
+#     # Set up field instructions for emotions
+#     emotion_fields = """
+#     هر آبجکت باید شامل "text" و "emotion" باشد.
+#     مقدار "text" باید یک جمله‌ی کوتاه فارسی باشد (مثلاً «من امروز برنده شدم»).
+#     مقدار "emotion" باید یکی از این موارد باشد: "غم"، "خشم"، "شگفتی"، "شادی"، "تنفر"، "ترس".
+#     """
     
-    # Configure the generator
-    generator.set_prompt_template(emotion_prompt, emotion_fields)
-    generator.set_contexts([
-        "در یک روز آفتابی",
-        "در یک شب بارانی", 
-        "در یک مهمانی خانوادگی",
-        "در یک سفر کاری",
-        "در یک کلاس درس",
-        "در یک رستوران شلوغ",
-        "در یک پارک آرام",
-        "در یک مرکز خرید",
-        "در یک کتابخانه",
-        "در یک بیمارستان"
-    ])
-    generator.set_temperature_range(0.7, 1.2)
+#     # Configure the generator
+#     generator.set_prompt_template(emotion_prompt, emotion_fields)
+#     generator.set_contexts([
+#         "در یک روز آفتابی",
+#         "در یک شب بارانی", 
+#         "در یک مهمانی خانوادگی",
+#         "در یک سفر کاری",
+#         "در یک کلاس درس",
+#         "در یک رستوران شلوغ",
+#         "در یک پارک آرام",
+#         "در یک مرکز خرید",
+#         "در یک کتابخانه",
+#         "در یک بیمارستان"
+#     ])
+#     generator.set_temperature_range(0.7, 1.2)
     
-    generator.run(total_samples=5000, data_type="متن احساسی", variety_parameter="احساس")
+#     generator.run(total_samples=5000, data_type="متن احساسی", variety_parameter="احساس")
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
