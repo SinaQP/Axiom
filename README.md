@@ -1,281 +1,171 @@
-# Generic Dataset Generator
+# AI Dataset Generator for Persian Q&A and Prompt-driven Data Creation
 
-A sophisticated AI-powered dataset generator that creates high-quality, diverse, and non-repetitive data for **any type of content** you need. The class is completely generic and flexible, with a **clean, simple public API** that makes it easy to use.
+A Python toolkit for generating structured datasets with LLMs, focused on Persian-language question datasets and reusable prompt-based generation workflows. The project is built to support repeatable data generation, deduplication, and CSV/JSON post-processing for chatbot training and related NLP tasks.
 
-## 🚀 Key Features
+## Why this project exists
+Building high-quality training data manually is slow, inconsistent, and hard to scale. This repository provides a practical generation pipeline that:
+- produces structured outputs via explicit JSON prompts,
+- reduces repeated content with hash-based duplicate filtering,
+- and keeps generation state saved incrementally to avoid lost progress.
 
-### 1. **Simple Public API**
-- **Only 5 public methods** - Easy to learn and use
-- **Clean interface** - No need to understand internal complexity
-- **Intuitive configuration** - Set up your data generation in minutes
+---
 
-### 2. **Completely Generic & Flexible**
-- **Any Data Type**: Generate emotions, products, restaurants, books, movies, or custom data
-- **Customizable Prompts**: Define your own prompt templates and field instructions
-- **Flexible Contexts**: Set domain-specific contexts for your use case
-- **Configurable Parameters**: Adjust all settings for your specific needs
+## Key features
 
-### 3. **Advanced Quality Features**
-- **Dynamic Prompt Generation**: Each request uses different contexts to prevent repetition
-- **Duplicate Prevention**: Automatic detection and filtering of duplicate content
-- **Variable Creativity**: Dynamic temperature and penalties for better output
-- **Robust Error Handling**: Retry logic and progress preservation
+- **Reusable `DatasetGenerator` core class** with configurable prompt template and output key.
+- **Diversity controls** (contexts, variety levels, randomized temperature range).
+- **Duplicate prevention** using content hashing.
+- **Fault-tolerant generation loop** with retries and progress saving.
+- **Response parsing safeguards** for malformed JSON responses.
+- **Utility scripts** for cleaning and converting generated question datasets.
 
-## 📁 Project Structure
+---
 
-```
-dataset-creator/
-├── main.py              # Generic DatasetGenerator class
-├── examples.py          # Examples for different data types
-├── avalai_client.py     # API client configuration
-├── requirements.txt     # Python dependencies
-├── test_enhancements.py # Test script
-└── README.md           # This file
-```
+## Tech stack
 
-## 🛠️ Installation
+- Python 3.10+
+- OpenAI-compatible API client (`openai`)
+- Pandas for tabular processing
+- tqdm for generation progress
+- python-dotenv for environment configuration
+- Optional LangChain wrappers in `avalai_client.py`
 
-1. **Clone the repository**
+---
+
+## How it works (architecture)
+
+1. `DatasetGenerator` builds a prompt from template variables (`context`, `count`, `data_type`, etc.).
+2. The prompt is sent to an OpenAI-compatible endpoint (default: Avalai base URL).
+3. The response is parsed to extract JSON payloads.
+4. Parsed records are flattened and de-duplicated.
+5. Progress is appended and saved incrementally to CSV.
+
+Core logic lives in:
+- `main.py` → generation pipeline
+- `avalai_client.py` → API client wrapper
+
+---
+
+## Installation
+
 ```bash
-git clone <repository-url>
-cd dataset-creator
-```
-
-2. **Install dependencies**
-```bash
+git clone <REPO_LINK>
+cd Axiom
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-3. **Set up environment variables**
-Create a `.env` file with your API key:
-```
-AVALAI_API_KEY=your_api_key_here
-```
+Create env file:
 
-## 🎯 Quick Start
-
-### Basic Usage (3 lines of code!)
-```python
-from main import DatasetGenerator
-
-# Create and run generator
-generator = DatasetGenerator()
-generator.run(total_samples=100)
-```
-
-### Custom Data Generation
-```python
-from main import DatasetGenerator
-
-# Create generator
-generator = DatasetGenerator(
-    dataset_filename="my_data.csv",
-    samples_per_request=25,
-    data_key="my_items"
-)
-
-# Configure for your data type
-generator.set_contexts(["Context 1", "Context 2", "Context 3"])
-generator.set_temperature_range(0.8, 1.3)
-
-# Generate data
-generator.run(total_samples=150, data_type="آیتم سفارشی", variety_parameter="ویژگی")
-```
-
-## 🔧 Public API Reference
-
-### Constructor
-```python
-DatasetGenerator(
-    dataset_filename="generated_dataset.csv",  # Output file name
-    samples_per_request=50,                    # Samples per API call
-    prompt_template=None,                      # Custom prompt template
-    data_key="data"                           # JSON key for data
-)
-```
-
-### Public Methods (Only 5!)
-
-| Method | Description | Example |
-|--------|-------------|---------|
-| `set_prompt_template(template, field_instructions=None)` | Set custom prompt and field structure | `generator.set_prompt_template(my_prompt, my_fields)` |
-| `set_contexts(contexts)` | Set custom contexts for variety | `generator.set_contexts(["Context 1", "Context 2"])` |
-| `set_variety_levels(levels)` | Set intensity/variety levels | `generator.set_variety_levels(["Low", "Medium", "High"])` |
-| `set_temperature_range(min_temp, max_temp)` | Set creativity range | `generator.set_temperature_range(0.7, 1.2)` |
-| `run(total_samples, data_type, variety_parameter)` | **Main method** - Generate data | `generator.run(100, "آیتم", "ویژگی")` |
-
-### Configurable Attributes
-```python
-generator.temperature_range = (0.7, 1.2)  # Creativity range
-generator.max_retries = 3                 # Retry attempts
-generator.contexts = [...]                # Context variety
-generator.variety_levels = [...]          # Intensity levels
-generator.prompt_template = "..."         # Prompt template
-```
-
-## 📊 Usage Examples
-
-### 1. Generate Emotion Data
-```python
-from examples import generate_emotion_data
-generate_emotion_data()
-```
-
-### 2. Generate Restaurant Data
-```python
-from examples import generate_restaurant_data
-generate_restaurant_data()
-```
-
-### 3. Generate Custom Data
-```python
-from main import DatasetGenerator
-
-# Define your custom prompt
-custom_prompt = """
-{context} {count} {data_type} تولید کن که هرکدام دارای {variety_parameter} {intensity} باشند.
-خروجی را فقط و فقط در فرمت JSON ارائه بده. کلیدهای JSON باید شامل "{data_key}" باشد که یک آرایه از آبجکت‌ها است.
-{field_instructions}
-هیچ متن اضافی قبل یا بعد از JSON قرار نده.
-"""
-
-# Define your field structure
-custom_fields = """
-هر آبجکت باید شامل "name", "description" و "category" باشد.
-مقدار کلید "name" باید نام خلاقانه باشد.
-مقدار کلید "description" باید توضیح کوتاه باشد.
-مقدار کلید "category" باید دسته‌بندی مناسب باشد.
-"""
-
-# Create and configure generator
-generator = DatasetGenerator(
-    dataset_filename="custom_data.csv",
-    samples_per_request=25,
-    data_key="custom_items"
-)
-
-generator.set_prompt_template(custom_prompt, custom_fields)
-generator.set_contexts([
-    "در یک محیط کاری",
-    "در یک فضای آموزشی", 
-    "در یک محیط تفریحی"
-])
-generator.set_temperature_range(0.8, 1.3)
-
-# Generate your data
-generator.run(total_samples=100, data_type="آیتم سفارشی", variety_parameter="ویژگی")
-```
-
-## 🎨 Prompt Template Structure
-
-### Template Variables
-- `{context}` - Random context from your contexts list
-- `{count}` - Number of samples to generate
-- `{data_type}` - Type of data you're generating
-- `{variety_parameter}` - Parameter for variety (e.g., "احساس", "ویژگی")
-- `{intensity}` - Random intensity level
-- `{data_key}` - JSON key for your data
-- `{field_instructions}` - Your custom field instructions
-
-### Example Template
-```
-{context} {count} {data_type} تولید کن که هرکدام دارای {variety_parameter} {intensity} باشند.
-خروجی را فقط و فقط در فرمت JSON ارائه بده. کلیدهای JSON باید شامل "{data_key}" باشد که یک آرایه از آبجکت‌ها است.
-{field_instructions}
-هیچ متن اضافی قبل یا بعد از JSON قرار نده.
-```
-
-## 📈 Best Practices
-
-### 1. **Start Simple**
-```python
-# Start with basic usage
-generator = DatasetGenerator()
-generator.run(total_samples=50)
-```
-
-### 2. **Customize Gradually**
-```python
-# Add custom contexts
-generator.set_contexts(["Context 1", "Context 2"])
-
-# Adjust creativity
-generator.set_temperature_range(0.8, 1.3)
-
-# Generate more data
-generator.run(total_samples=100)
-```
-
-### 3. **Choose Appropriate Batch Sizes**
-- **High Quality**: 10-20 samples per request
-- **Balanced**: 25-35 samples per request  
-- **High Volume**: 40-50 samples per request
-
-### 4. **Define Clear Field Instructions**
-```python
-field_instructions = """
-هر آبجکت باید شامل "name", "description" و "category" باشد.
-مقدار کلید "name" باید نام خلاقانه باشد.
-مقدار کلید "description" باید توضیح کوتاه باشد.
-مقدار کلید "category" باید دسته‌بندی مناسب باشد.
-"""
-```
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-1. **Low Quality Output**
-   - Reduce `samples_per_request`
-   - Increase temperature range
-   - Add more diverse contexts
-
-2. **Too Many Duplicates**
-   - Check if contexts are too similar
-   - Increase temperature for more variation
-   - Add more context variety
-
-3. **API Errors**
-   - Check API key configuration
-   - Reduce request frequency
-   - Increase retry count
-
-## 📝 Example Output
-
-```
-Starting generation of 100 آیتم samples...
-Using dynamic prompts with 10 different contexts
-Temperature range: (0.7, 1.2)
-Number of requests needed: 4
-
-🔄 Request 1 (attempt 1)
-Response preview: {"data": [{"name": "آیتم خلاقانه", "description": "توضیح کوتاه"}]}...
-✅ 25 unique samples generated so far
-💾 Progress saved: 25 samples in dataset
-
-Data generation completed successfully.
-✅ Final dataset contains 100 records
-Total unique samples generated: 100
-Total requests made: 4
-
-Dataset successfully completed and saved to 'generated_dataset.csv'
-```
-
-## 🧪 Testing
-
-Run the test script to verify everything works:
 ```bash
-python test_enhancements.py
+cp .env.example .env
 ```
 
-## 🤝 Contributing
+Then set at least:
 
-Feel free to contribute to this project by:
-- Adding new prompt templates
-- Improving error handling
-- Adding new features
-- Reporting bugs
+```env
+AVALAI_API_KEY=your_api_key
+```
 
-## 📄 License
+Optional:
 
-This project is licensed under the MIT License. 
+```env
+AVALAI_BASE_URL=https://api.avalai.ir/v1
+AVALAI_MODEL_NAME=gpt-4o-mini
+```
+
+---
+
+## Usage
+
+### 1) Use the core generator directly
+
+```python
+from main import DatasetGenerator
+
+generator = DatasetGenerator(
+    dataset_filename="generated_dataset.csv",
+    samples_per_request=25,
+    data_key="questions"
+)
+
+generator.run(total_samples=100, data_type="سوال", variety_parameter="پیچیدگی")
+```
+
+### 2) Run domain-specific generators
+
+- `python system-questions.py`
+- `python irrelevant_questions_generator.py`
+- `python workplace_humanize.py`
+
+Each script provides an interactive choice for full dataset generation vs test dataset generation.
+
+### 3) Clean and convert datasets
+
+```bash
+python clean_questions.py chatbot_training_dataset.csv
+python remove-dublicate.py chatbot_training_dataset.csv
+python csv-convertor-to-json.py chatbot_training_dataset_cleaned.csv
+```
+
+---
+
+## Example I/O
+
+**Input:** prompt template + dataset generation settings.
+
+**Output:** CSV file with generated rows, e.g.:
+
+| question |
+|---|
+| چگونه وارد سیستم شوم؟ |
+| چطور گزارش هفتگی بگیرم؟ |
+
+You can then convert to JSON arrays for downstream model training.
+
+---
+
+## Folder structure
+
+```text
+Axiom/
+├── main.py                          # Core DatasetGenerator class
+├── avalai_client.py                 # OpenAI-compatible API client wrapper
+├── system-questions.py              # System-related question generation
+├── irrelevant_questions_generator.py# Irrelevant question generation
+├── workplace_humanize.py            # Workplace-oriented question generation
+├── clean_questions.py               # Extract and deduplicate question column
+├── remove-dublicate.py              # General question deduplication utility
+├── csv-convertor-to-json.py         # CSV to JSON converter utility
+├── requirements.txt
+├── .env.example
+├── CONTRIBUTING.md
+├── LICENSE
+└── README.md
+```
+
+---
+
+## Engineering decisions and challenges solved
+
+- **Robustness over ideal responses:** LLM outputs can be malformed; parser logic includes cleanup and fallback extraction.
+- **Data quality controls:** Duplicate detection is built into the generation loop, not only post-processing.
+- **Operational safety:** Progress is saved after successful requests to avoid losing long-running generation jobs.
+- **Flexibility:** Prompt templates and field instructions are configurable without modifying core generation flow.
+
+---
+
+## Future improvements
+
+- Add automated tests for parsing, deduplication, and save/merge behavior.
+- Split scripts into a package with a unified CLI (`argparse`/`typer`).
+- Add schema validation (e.g., `pydantic`) for output quality guarantees.
+- Add structured logging instead of print statements.
+- Add deterministic run mode (seed + config export) for reproducible datasets.
+
+---
+
+## Resume-ready positioning
+
+This project demonstrates practical LLM engineering skills: prompt design, defensive parsing, data-quality enforcement, and automation-oriented data pipelines for NLP dataset creation.
