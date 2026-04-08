@@ -5,7 +5,6 @@ from tqdm import tqdm
 import time
 import random
 import hashlib
-from collections import defaultdict
 from dotenv import load_dotenv
 from avalai_client import AvalaiClient
 
@@ -216,7 +215,7 @@ class DatasetGenerator:
                         flattened_items.extend(parsed_item)
                     else:
                         flattened_items.append(parsed_item)
-                except:
+                except (json.JSONDecodeError, TypeError):
                     # If it's not JSON, treat as text
                     flattened_items.append({"text": item, "emotion": "unknown"})
         
